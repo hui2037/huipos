@@ -132,6 +132,7 @@ header{background:var(--acc);height:58px;display:flex;align-items:center;padding
   <div class="h-logo"><span class="m">咕嚕咕嚕</span><span class="s">廚 房 出 單</span></div>
   <span class="clock" id="clock"></span>
   <span class="h-badge live" id="live-badge">● 監聽中</span>
+  <button class="h-btn" id="auto-print-btn" onclick="toggleAutoPrint()" style="background:rgba(255,200,80,.2);border-color:rgba(255,200,80,.4);color:#ffe066">🖨️ 自動列印：關</button>
   <button class="h-btn" onclick="toggleFilter()">篩選狀態</button>
   <button class="h-btn danger" onclick="clearDone()">清除完成</button>
 </header>
@@ -161,6 +162,30 @@ header{background:var(--acc);height:58px;display:flex;align-items:center;padding
 <div id="print-ticket"></div>
 
 <script>
+let autoPrint = false;
+
+function toggleAutoPrint(){
+  autoPrint = !autoPrint;
+  const btn = document.getElementById('auto-print-btn');
+  if(autoPrint){
+    btn.textContent = '🖨️ 自動列印：開';
+    btn.style.background = 'rgba(80,255,150,.25)';
+    btn.style.borderColor = 'rgba(80,255,150,.5)';
+    btn.style.color = '#80ffaa';
+  } else {
+    btn.textContent = '🖨️ 自動列印：關';
+    btn.style.background = 'rgba(255,200,80,.2)';
+    btn.style.borderColor = 'rgba(255,200,80,.4)';
+    btn.style.color = '#ffe066';
+  }
+}
+
+function autoPrintOrder(o){
+  if(!autoPrint) return;
+  // slight delay to let print-ticket DOM update
+  setTimeout(()=>{ printOrder(o.fbKey); }, 800);
+}
+
 let orders=[];
 let activeTab='all';
 let seenIds=new Set();
@@ -183,6 +208,7 @@ function startFirebaseListener(){
           seenIds.add(o.fbKey);
           showToast(o);
           playBeep();
+          autoPrintOrder(o);
         }
       });
     } else {
